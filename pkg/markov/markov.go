@@ -10,7 +10,7 @@ type Markov struct {
 }
 
 const (
-	start_of_string = "START_OF_STRING_START_OF_STRING"
+	start_of_string = ""
 	end_of_string = "\n"
 )
 
