@@ -5,7 +5,7 @@ Generate random CVE decscriptions with Markov chains:
 
     $ curl https://cve.mitre.org/data/downloads/allitems.xml.gz | gunzip > allitems.xml
     $ marcve --filename allitems.xml &
-    $ curl http://127.0.0.1:8080/
+    $ curl http://127.0.0.1:8080/cve/2020/1471
     Unspecified vulnerability in Cisco Secure Elements Class Name field, which
     allows remote attackers to obtain sensitive environment variable and 2.2.x
     before 9.5.2 and 3.x, allows remote attackers to execute arbitrary web cache

@@ -7,8 +7,10 @@ import (
 	"encoding/xml"
 	"flag"
 	"fmt"
+	"github.com/gorilla/mux"
 	"github.com/philipturnbull/marcve/pkg/markov"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"net/http"
 	"os"
@@ -55,19 +57,25 @@ type CVEHandler struct {
 }
 
 func (h *CVEHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, h.chain.Generate(rand.New(rand.NewSource(time.Now().Unix()))))
+	vars := mux.Vars(r)
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, h.chain.Generate(rand_from_string("CVE-"+vars["year"]+"-"+vars["id"])))
 }
 
 func run_server(chain *markov.Markov) {
 	handler := &CVEHandler{chain}
+
+	r := mux.NewRouter()
+	r.Handle("/cve/{year}/{id}", handler)
+
 	s := &http.Server{
 		Addr:           ":8080",
-		Handler:        handler,
+		Handler:        r,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
-	s.ListenAndServe()
+	log.Fatal(s.ListenAndServe())
 }
 
 func main() {
