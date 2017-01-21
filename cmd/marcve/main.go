@@ -10,7 +10,9 @@ import (
 	"github.com/philipturnbull/marcve/pkg/markov"
 	"io/ioutil"
 	"math/rand"
+	"net/http"
 	"os"
+	"time"
 )
 
 type CVE struct {
@@ -48,13 +50,29 @@ func rand_from_string(s string) *rand.Rand {
 	return rand.New(rand.NewSource(seed))
 }
 
+type CVEHandler struct {
+	chain *markov.Markov
+}
+
+func (h *CVEHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, h.chain.Generate(rand.New(rand.NewSource(time.Now().Unix()))))
+}
+
+func run_server(chain *markov.Markov) {
+	handler := &CVEHandler{chain}
+	s := &http.Server{
+		Addr:           ":8080",
+		Handler:        handler,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+	s.ListenAndServe()
+}
+
 func main() {
-	var cve_id string
 	var xml_filename string
-
-	flag.StringVar(&cve_id, "id", "CVE-2017-0001", "CVE identifier")
 	flag.StringVar(&xml_filename, "filename", "allitems.xml", "CVE XML filename")
-
 	flag.Parse()
 
 	cve, err := parse_xml(xml_filename)
@@ -68,5 +86,5 @@ func main() {
 		chain.Update(item.Description)
 	}
 
-	fmt.Println(chain.Generate(rand_from_string(cve_id)))
+	run_server(chain)
 }
