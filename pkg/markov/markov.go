@@ -11,7 +11,7 @@ type Markov struct {
 
 const (
 	start_of_string = "START_OF_STRING_START_OF_STRING"
-	end_of_string   = "END_OF_STRING_END_OF_STRING"
+	end_of_string = "\n"
 )
 
 func New() *Markov {
